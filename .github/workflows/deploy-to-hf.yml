@@ -1,0 +1,54 @@
+name: Deploy to Hugging Face Space
+
+on:
+  push:
+    branches:
+      - main          # deploy whenever you push to main
+  workflow_dispatch:  # allow manual run from Actions tab
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Hugging Face Hub
+        run: pip install huggingface_hub
+
+      - name: Push to Hugging Face Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          python - << "EOF"
+          from huggingface_hub import HfApi
+
+          # 🔴 CHANGE THIS to your real Hugging Face Space id
+          #   format: "<hf-username>/<space-name>"
+          #   example: "ANANDA89/dt_hf_deploy"
+          repo_id = "yashuchouhan/Mlopsdeployment"
+
+          api = HfApi()
+
+          # Create the Space if it doesn't exist
+          api.create_repo(
+              repo_id=repo_id,
+              repo_type="space",
+              exist_ok=True,
+              space_sdk="gradio",
+          )
+
+          # Upload all files except git/CI metadata
+          api.upload_folder(
+              folder_path=".",
+              repo_id=repo_id,
+              repo_type="space",
+              ignore_patterns=[".git", ".github"],
+          )
+          EOF
