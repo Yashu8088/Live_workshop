@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 ---
 title: Iris Deployment Workshop
 sdk: gradio
